@@ -6,12 +6,13 @@ pipeline {
     }
 
     stages {
-        stage('Prepare') {
-            steps {
-                sh 'docker-compose down'  // Остановить старые контейнеры
-                sh 'docker-compose build' // Пересобрать образы (если нужно)
+        stages {
+                stage('Version') {
+                    steps {
+                        sh 'go version'
+                    }
+                }
             }
-        }
 
 
 
