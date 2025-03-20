@@ -7,9 +7,8 @@ pipeline {
     }
 
     environment {
-        GO_VERSION = "1.21"
-        GOPATH = "/go"
-        GOMODCACHE = "${env.WORKSPACE}/.go-mod-cache"
+        GO_HOME = tool 'go124'  // Используем установленную версию
+                PATH = "${env.GO_HOME}/bin:${env.PATH}"
     }
 
     stages {
