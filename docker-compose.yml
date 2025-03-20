@@ -10,5 +10,19 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+  go-app:
+    image: golang:latest  # Официальный образ Go
+    container_name: go-app
+    volumes:
+      - .:/app  # Монтирует текущую директорию в /app внутри контейнера
+    working_dir: /app  # Рабочая директория внутри контейнера
+    environment:
+      - GO111MODULE=on
+      - GOPATH=/go
+    ports:
+      - "8000:8000"  # Порт для вашего приложения (если нужно)
+    depends_on:
+      - postgres  # Зависит от PostgreSQL
+    command: sh -c "go version && go run main.go"
 volumes:
   postgres_data:

@@ -1,16 +1,43 @@
 pipeline {
-    agent {
-        docker {
-            image 'golang:latest'  // Официальный образ Go
-            args '-v $HOME/.go-cache:/go/pkg/mod'  // Кэш модулей
-        }
+    agent any
+
+    environment {
+        DOCKER_HOST = "unix:///var/run/docker.sock"
     }
 
     stages {
-        stage('Check Go') {
+        stage('Prepare') {
             steps {
-                sh 'go version'
+                sh 'docker-compose down'  // Остановить старые контейнеры
+                sh 'docker-compose build' // Пересобрать образы (если нужно)
             }
+        }
+
+
+
+        stage('Build') {
+            steps {
+                sh 'docker-compose up -d postgres'  // Запустить PostgreSQL
+                sh 'docker-compose run --rm go-app go build -o app'  // Собрать приложение
+                archiveArtifacts artifacts: 'app', fingerprint: true  // Сохранить артефакт
+            }
+            post {
+                always {
+                    sh 'docker-compose down'  // Остановить контейнеры
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'docker-compose up -d'  // Запустить всё
+            }
+        }
+    }
+
+    post {
+        always {
+            sh 'docker-compose down'  // Убедиться, что контейнеры остановлены
         }
     }
 }
